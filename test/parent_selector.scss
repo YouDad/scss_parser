@@ -8,3 +8,11 @@ a {
 		font-weight: normal;
 	}
 }
+
+#main {
+	color: black;
+	a {
+		font-weight: bold;
+		&:hover { color: red; }
+	}
+}
