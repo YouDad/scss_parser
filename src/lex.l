@@ -3,6 +3,7 @@
 %}
 
 %x COMMENT
+%x VALUE_COLOR
 
 digit               ([0-9])
 hex_digit           ({digit}|[a-fA-F])
@@ -12,7 +13,6 @@ blanks              ([ \t]*)
 
 number              ({digit}+)
 identifier          ({alpha}{id_all}|-{alpha}{id_all}|--{id_all})
-hex_or_selector     (#[a-fA-F]({hex_digit}{2}|{hex_digit}{5}))
 language            (zh|en)
 
 class_sor           ([.]{identifier})
@@ -38,9 +38,9 @@ selector            ({sor}|{sor}{blanks}{sor})+
 
 hex3                (#{hex_digit}{3})
 hex6                (#{hex_digit}{6})
-value               ({hex3}|{hex6}|{number}|bold|none|underline|normal)
+value               ({number}|bold|none|underline|normal)
 
-attr                ((color|width|background-color|font-size|font-weight|text-decoration):)
+attr                ((width|font-size|font-weight|text-decoration):)
 unit                (%|px|em)
 
 %%
@@ -55,12 +55,6 @@ unit                (%|px|em)
 	log::debug("unit: '%s'", yytext);
 	yylval.str = yytext;
 	return UNIT;
-}
-
-{hex_or_selector} {
-	log::debug("hex_or_selector: '%s'", yytext);
-	yylval.str = yytext;
-	return HEX_OR_SELECTOR;
 }
 
 {value} {
@@ -89,6 +83,24 @@ unit                (%|px|em)
 
 "//" {
 	BEGIN COMMENT;
+}
+
+(background-color|color): {
+	BEGIN VALUE_COLOR;
+	log::debug("attr: '%s'", yytext);
+	yylval.str = yytext;
+	return ATTR;
+}
+
+<VALUE_COLOR>(black|red|{hex3}|{hex6}) {
+	BEGIN INITIAL;
+	log::debug("value: '%s'", yytext);
+	yylval.str = yytext;
+	return VALUE;
+}
+
+<VALUE_COLOR>. {
+	log::debug("any: '%s'", yytext);
 }
 
 <COMMENT>\n {

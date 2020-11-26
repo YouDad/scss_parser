@@ -3,7 +3,6 @@
 #include "modules/css_block.h"
 %}
 
-%token<str> HEX_OR_SELECTOR
 %token<str> SELECTOR
 %token<str> ATTR
 %token<str> VALUE
@@ -15,9 +14,7 @@
 %type<str> scss_statement
 %type<str> css_block css_block1 css_block2
 %type<str> declare
-%type<str> selector
 %type<str> selectors
-%type<str> value
 %type<str> value_unit
 
 %%
@@ -72,43 +69,33 @@ css_block2: statements '}' {
 	css_block_module::exit_scope();
 }
 
-selector: SELECTOR {
-	log::info("selector: SELECTOR");
-	$$ = $1;
-}
-
-selector: HEX_OR_SELECTOR {
-	log::info("selector: HEX_OR_SELECTOR");
-	$$ = $1;
-}
-
-selectors: selectors selector {
-	log::info("selectors: selectors selector");
+selectors: selectors SELECTOR {
+	log::info("selectors: selectors SELECTOR");
 	$$ = $1 + $2;
 }
 
-selectors: selectors ',' selector {
-	log::info("selectors: selectors ',' selector");
+selectors: selectors ',' SELECTOR {
+	log::info("selectors: selectors ',' SELECTOR");
 	$$ = $1 + $2 + $3;
 }
 
-selectors: selectors '~' selector {
-	log::info("selectors: selectors '~' selector");
+selectors: selectors '~' SELECTOR {
+	log::info("selectors: selectors '~' SELECTOR");
 	$$ = $1 + $2 + $3;
 }
 
-selectors: selectors '+' selector {
-	log::info("selectors: selectors '+' selector");
+selectors: selectors '+' SELECTOR {
+	log::info("selectors: selectors '+' SELECTOR");
 	$$ = $1 + $2 + $3;
 }
 
-selectors: selectors '>' selector {
-	log::info("selectors: selectors '>' selector");
+selectors: selectors '>' SELECTOR {
+	log::info("selectors: selectors '>' SELECTOR");
 	$$ = $1 + $2 + $3;
 }
 
-selectors: selector {
-	log::info("selectors: selector");
+selectors: SELECTOR {
+	log::info("selectors: SELECTOR");
 	$$ = $1;
 }
 
@@ -117,23 +104,13 @@ declare: ATTR value_unit ';' {
 	$$ = $1 + " " + $2 + $3;
 }
 
-value: VALUE {
-	log::info("value: VALUE");
+value_unit: VALUE {
+	log::info("value_unit: VALUE");
 	$$ = $1;
 }
 
-value: HEX_OR_SELECTOR {
-	log::info("value: HEX_OR_SELECTOR");
-	$$ = $1;
-}
-
-value_unit: value {
-	log::info("value_unit: value");
-	$$ = $1;
-}
-
-value_unit: value UNIT {
-	log::info("value_unit: value UNIT");
+value_unit: VALUE UNIT {
+	log::info("value_unit: VALUE UNIT");
 	$$ = $1 + $2;
 }
 
