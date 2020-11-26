@@ -8,7 +8,7 @@
 %token<str> ATTR
 %token<str> VALUE
 %token<str> UNIT
-%token<str> '{' '}' ';' '@' ','
+%token<str> '{' '}' ';' '@' ',' '~' '+' '>'
 
 %type<str> start
 %type<str> statements
@@ -84,11 +84,26 @@ selector: HEX_OR_SELECTOR {
 
 selectors: selectors selector {
 	log::info("selectors: selectors selector");
-	$$ = $1 + " " + $2;
+	$$ = $1 + $2;
 }
 
 selectors: selectors ',' selector {
 	log::info("selectors: selectors ',' selector");
+	$$ = $1 + $2 + $3;
+}
+
+selectors: selectors '~' selector {
+	log::info("selectors: selectors '~' selector");
+	$$ = $1 + $2 + $3;
+}
+
+selectors: selectors '+' selector {
+	log::info("selectors: selectors '+' selector");
+	$$ = $1 + $2 + $3;
+}
+
+selectors: selectors '>' selector {
+	log::info("selectors: selectors '>' selector");
 	$$ = $1 + $2 + $3;
 }
 

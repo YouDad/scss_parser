@@ -13,7 +13,6 @@ if [[ "$1" != "" ]]; then
 		exit 1
 	else
 		echo -e "$1: \033[32msuccess\033[0m"
-		exit 0
 	fi
 
 	outname=`echo $1 | sed 's/^test/out/'`
@@ -33,10 +32,8 @@ for file in test/*.scss; do
 	ret=$?
 	if [[ "$ret" != "0" ]]; then
 		echo -e "$file: \033[31mfailed($ret)\033[0m"
+		./scss $file
 		exit 1
-	else
-		echo -e "$file: \033[32msuccess\033[0m"
-		exit 0
 	fi
 
 	outname=`echo $file | sed 's/^test/out/'`

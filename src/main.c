@@ -5,33 +5,43 @@ void print_node(struct css_block_module::css_block *itor) {
 	css_block_module::strings selectors;
 	css_block_module::get_itor_selectors(itor, selectors);
 
-	css_block_module::strings splice_selectors;
+	// splice_selectors
+	css_block_module::strings ss;
 	for (int i = 0; i < selectors.size(); i++) {
-		splice_selectors.push_back(selectors[i]);
+		ss.push_back(selectors[i]);
 	}
 
 	auto it = itor;
 	while (css_block_module::itor_parent(css_block_module::itor_parent(it))) {
 		it = css_block_module::itor_parent(it);
 		css_block_module::get_itor_selectors(it, selectors);
-		css_block_module::strings new_splice_selectors;
+		// new_splice_selectors
+		css_block_module::strings nss;
 
 		for (int i = 0; i < selectors.size(); i++) {
-			for (int j = 0; j < splice_selectors.size(); j++) {
-				new_splice_selectors.push_back(selectors[i] + " " + splice_selectors[j]);
+			for (int j = 0; j < ss.size(); j++) {
+				if (ss[j].find('&') != std::string::npos) {
+					int found = ss[j].find('&');
+					std::string str = ss[j].substr(0, found);
+					str += selectors[i];
+					str += ss[j].substr(found + 1);
+					nss.push_back(str);
+				} else {
+					nss.push_back(selectors[i] + " " + ss[j]);
+				}
 			}
 		}
 
-		splice_selectors = new_splice_selectors;
+		ss = nss;
 	}
 
 	css_block_module::strings declares;
 	css_block_module::get_itor_declares(itor, declares);
 
 	if (declares.size()) {
-		for (int i = 0; i < splice_selectors.size(); i++) {
-			bool is_end = i == splice_selectors.size() - 1;
-			printf("%s%s ", splice_selectors[i].c_str(), is_end ? "" : ",");
+		for (int i = 0; i < ss.size(); i++) {
+			bool is_end = i == ss.size() - 1;
+			printf("%s%s ", ss[i].c_str(), is_end ? "" : ",");
 		}
 
 		printf("{\n");
@@ -100,6 +110,7 @@ int main(int argc, char **argv) {
 
 	if (parse_ret == 1) {
 		log::error("occur error!\n\n");
+		return 1;
 	} else {
 		dfs_print();
 	}
