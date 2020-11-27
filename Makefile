@@ -24,10 +24,9 @@ src:
 	make install -C src/
 
 .PHONY: test
-test: src
+test:
 	make -C test/
 	make install -C test/
-	make clean
 
 .PHONY: install
 install:

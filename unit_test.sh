@@ -1,5 +1,6 @@
 #!/bin/bash
 
+make
 make test
 if [[ "$?" != "0" ]]; then
 	exit "$?"
@@ -32,7 +33,7 @@ for file in test/*.scss; do
 	ret=$?
 	if [[ "$ret" != "0" ]]; then
 		echo -e "$file: \033[31mfailed($ret)\033[0m"
-		./scss $file
+		./scss $file -vvv
 		exit 1
 	fi
 
