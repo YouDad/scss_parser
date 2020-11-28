@@ -3,12 +3,11 @@ default: compile
 
 .PHONY: compile
 compile: lex yacc $(objs)
-	$(CC) $(CPPFLAGS) main.c $(objs) -o scss
+	$(CC) $(CPPFLAGS) main.c $(objs) -o elex
 
 .PHONY: lex
 lex:
-	$(OUTDIR)/elex lex.l > .lex.l
-	flex .lex.l
+	flex lex.l
 	mv lex.yy.c $(OUTDIR)/
 
 .PHONY: yacc
@@ -19,4 +18,4 @@ yacc:
 
 .PHONY: install
 install:
-	mv scss $(OUTDIR)/
+	mv elex $(OUTDIR)/

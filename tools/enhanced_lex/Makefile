@@ -14,13 +14,8 @@ objs += $(patsubst %.c, %.o, $(wildcard $(CURDIR)/out/*.c))
 objs += $(patsubst %.cpp, %.o, $(wildcard $(CURDIR)/out/*.cpp))
 
 .PHONY: default
-default: tools src install
+default: src install
 	make clean
-
-.PHONY: tools
-tools:
-	make -C tools/
-	make install -C tools/
 
 .PHONY: src
 src:
@@ -35,7 +30,7 @@ test:
 
 .PHONY: install
 install:
-	mv $(OUTDIR)/scss ./scss
+	mv $(OUTDIR)/elex ./elex
 
 .PHONY: clean
 clean:
