@@ -11,6 +11,7 @@ if [[ "$1" != "" ]]; then
 	ret=$?
 	if [[ "$ret" != "0" ]]; then
 		echo -e "$1: \033[31mfailed($ret)\033[0m"
+		./scss $file -vvv
 		exit 1
 	else
 		echo -e "$1: \033[32msuccess\033[0m"
@@ -21,6 +22,7 @@ if [[ "$1" != "" ]]; then
 	result=`icdiff $outname $rightname | wc -l`
 	if [[ "$result" != "0" ]]; then
 		echo -e "$1: \033[31mfailed($ret)\033[0m"
+		icdiff $outname $rightname
 		exit 1
 	else
 		echo -e "$1: \033[32msuccess\033[0m"

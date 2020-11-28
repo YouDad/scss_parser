@@ -7,6 +7,7 @@
 %token<str> ATTR
 %token<str> VALUE
 %token<str> UNIT
+%token<str> BLOCK_COMMENT_TOKEN
 %token<str> '{' '}' ';' '@' ',' '~' '+' '>'
 
 %type<str> start
@@ -14,6 +15,7 @@
 %type<str> scss_statement
 %type<str> css_block css_block1 css_block2
 %type<str> declare
+%type<str> declare_block1 declare_block2
 %type<str> selectors
 %type<str> value_unit
 
@@ -34,6 +36,11 @@ statements: statements css_block {
 statements: statements declare {
 	log::info("statements: statements declare");
 	css_block_module::add_declare($2);
+}
+
+statements: statements BLOCK_COMMENT_TOKEN {
+	log::info("statements: statements BLOCK_COMMENT_TOKEN");
+	css_block_module::add_comment($2);
 }
 
 statements: {
@@ -102,6 +109,29 @@ selectors: SELECTOR {
 declare: ATTR value_unit ';' {
 	log::info("declare: ATTR value_unit ';'");
 	$$ = $1 + " " + $2 + $3;
+}
+
+declare: declare_block1 declare_block2 {
+	log::info("declare: declare_block1 declare_block2");
+	$$ = "";
+}
+
+declare_block1: ATTR value_unit '{' {
+	log::info("declare_block1: ATTR value_unit '{'");
+	css_block_module::add_declare($1 + " " + $2 + ";");
+	css_block_module::enter_scope();
+	css_block_module::add_declare_block_prefix($1);
+}
+
+declare_block1: ATTR '{' {
+	log::info("declare_block1: ATTR '{'");
+	css_block_module::enter_scope();
+	css_block_module::add_declare_block_prefix($1);
+}
+
+declare_block2: statements '}' {
+	log::info("declare_block2: statements '}'");
+	css_block_module::exit_scope();
 }
 
 value_unit: VALUE {

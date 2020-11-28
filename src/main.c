@@ -35,6 +35,11 @@ void print_node(struct css_block_module::css_block *itor) {
 		ss = nss;
 	}
 
+	auto block_comment = css_block_module::get_itor_block_comment(itor);
+	if (block_comment.size()) {
+		printf("%s", block_comment.c_str());
+	}
+
 	css_block_module::strings declares;
 	css_block_module::get_itor_declares(itor, declares);
 
@@ -67,7 +72,9 @@ void dfs(struct css_block_module::css_block *itor) {
 };
 
 void dfs_print() {
+	css_block_module::process_nested_prop();
 	auto itor = css_block_module::get_itor();
+
 	do {
 		print_node(itor);
 

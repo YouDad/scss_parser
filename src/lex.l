@@ -1,9 +1,27 @@
+// %include "color.l"
+// %include "font.l"
+// %include "comment.l"
 %{
 #include "header.h"
-%}
+#include <stack>
+std::string attr_prefix;
+std::stack<int> state_stack;
+int curstate = 0; // INITIAL
+#define ENTER_STATE(state)          \
+	do {                            \
+		state_stack.push(curstate); \
+		curstate = state;           \
+		BEGIN curstate;             \
+	} while (0)
 
-%x COMMENT
-%x VALUE_COLOR
+#define EXIT_STATE()                  \
+	do {                              \
+		curstate = state_stack.top(); \
+		state_stack.pop();            \
+		BEGIN curstate;             \
+	} while (0)
+
+%}
 
 digit               ([0-9])
 hex_digit           ({digit}|[a-fA-F])
@@ -13,7 +31,11 @@ blanks              ([ \t]*)
 
 number              ({digit}+)
 identifier          ({alpha}{id_all}|-{alpha}{id_all}|--{id_all})
+string              (\"[^\"]*\")
 language            (zh|en)
+units               (cap|ch|em|ex|ic|lh|rem|rlh|vh|vw|vi|vb|vmin|vmax|px|cm|mm|Q|in|pc|pt)
+length              (0|{number}{units})
+percentage          ([+-]?{number}%)
 
 class_sor           ([.]{identifier})
 id_sor              (#{identifier})
@@ -40,7 +62,9 @@ hex3                (#{hex_digit}{3})
 hex6                (#{hex_digit}{6})
 value               ({number}|bold|none|underline|normal)
 
-attr                ((width|font-size|font-weight|text-decoration):)
+global_value        (inherit|initial|unset)
+
+attr                ((width|height|font-size|font-weight|text-decoration|font):)
 unit                (%|px|em)
 
 %%
@@ -48,6 +72,7 @@ unit                (%|px|em)
 {attr} {
 	log::debug("attr: '%s'", yytext);
 	yylval.str = yytext;
+	attr_prefix = yytext;
 	return ATTR;
 }
 
@@ -71,7 +96,37 @@ unit                (%|px|em)
 
 "\n" {}
 
-([{};@,]) {
+"{" {
+	log::debug("single: '%s'", yytext);
+	if (attr_prefix.size()) {
+		if ("font:" == attr_prefix) {
+			ENTER_STATE(ATTR__font);
+		} else {
+			log::warn("unrecognized attr_prefix %s", attr_prefix.c_str());
+		}
+	}
+	yylval.str = yytext;
+	return yytext[0];
+}
+
+"}" {
+	log::debug("single: '%s'", yytext);
+	if (attr_prefix.size()) {
+		EXIT_STATE();
+	}
+	attr_prefix = "";
+	yylval.str = yytext;
+	return yytext[0];
+}
+
+";" {
+	log::debug("single: '%s'", yytext);
+	attr_prefix = "";
+	yylval.str = yytext;
+	return yytext[0];
+}
+
+([@,]) {
 	log::debug("single: '%s'", yytext);
 	yylval.str = yytext;
 	return yytext[0];
@@ -80,33 +135,5 @@ unit                (%|px|em)
 . {
 	log::debug("any: '%s'", yytext);
 }
-
-"//" {
-	BEGIN COMMENT;
-}
-
-(background-color|color): {
-	BEGIN VALUE_COLOR;
-	log::debug("attr: '%s'", yytext);
-	yylval.str = yytext;
-	return ATTR;
-}
-
-<VALUE_COLOR>(black|red|{hex3}|{hex6}) {
-	BEGIN INITIAL;
-	log::debug("value: '%s'", yytext);
-	yylval.str = yytext;
-	return VALUE;
-}
-
-<VALUE_COLOR>. {
-	log::debug("any: '%s'", yytext);
-}
-
-<COMMENT>\n {
-	BEGIN INITIAL;
-}
-
-<COMMENT>. {}
 
 %%
