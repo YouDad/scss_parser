@@ -8,9 +8,7 @@ CPPFLAGS += -I$(CURDIR)/inc/
 CPPFLAGS += -I$(CURDIR)/out/
 
 OUTDIR := $(CURDIR)/out
-objs := $(patsubst %.c, %.o, $(wildcard $(CURDIR)/src/*/*.c))
-objs += $(patsubst %.cpp, %.o, $(wildcard $(CURDIR)/src/*/*.cpp))
-objs += $(patsubst %.c, %.o, $(wildcard $(CURDIR)/out/*.c))
+objs := $(patsubst %.cpp, %.o, $(wildcard $(CURDIR)/src/*/*.cpp))
 objs += $(patsubst %.cpp, %.o, $(wildcard $(CURDIR)/out/*.cpp))
 
 .PHONY: default
